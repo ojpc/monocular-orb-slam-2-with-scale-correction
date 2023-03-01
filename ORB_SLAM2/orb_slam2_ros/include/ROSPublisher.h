@@ -29,7 +29,9 @@
 
 #include <octomap/OcTree.h>
 
+
 #include <orb_slam2_ros/ORBState.h>
+//#include <orb_slam2_ros/SaveMap.h>
 
 namespace ORB_SLAM2
 {
@@ -45,9 +47,9 @@ class ROSPublisher :
 {
 public:
 
-    static constexpr const char *DEFAULT_MAP_FRAME = "/orb_slam2/map";
-    static constexpr const char *DEFAULT_CAMERA_FRAME = "/orb_slam2/camera";
-    static constexpr const char *DEFAULT_IMAGE_TOPIC = "/orb_slam2/image";
+    static constexpr const char *DEFAULT_MAP_FRAME = "map";
+    static constexpr const char *DEFAULT_CAMERA_FRAME = "usb_cam";
+    static constexpr const char *DEFAULT_IMAGE_TOPIC = "/usb_cam/image_raw";
 
     // `frequency` is max amount of messages emitted per second
     explicit ROSPublisher(
@@ -61,6 +63,7 @@ public:
 protected:
 
     bool WaitCycleStart();
+    ORB_SLAM2::System* orb_slam_;
 
 private:
 
@@ -84,6 +87,10 @@ private:
     void publishProjectedMap();
     void publishGradientMap();
     void publishCamTrajectory();
+
+    //bool SaveMapSrv (orb_slam2_ros::SaveMap::Request &req, orb_slam2_ros::SaveMap::Response &res);
+    ros::ServiceServer service_server_;
+    std::string name_of_node_;
 
     ORB_SLAM2::FrameDrawer drawer_;
 

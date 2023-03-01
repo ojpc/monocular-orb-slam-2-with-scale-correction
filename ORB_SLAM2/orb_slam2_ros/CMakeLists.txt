@@ -30,6 +30,11 @@ add_message_files(
   ORBState.msg
 )
 
+add_service_files(
+        FILES
+        SaveMap.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs

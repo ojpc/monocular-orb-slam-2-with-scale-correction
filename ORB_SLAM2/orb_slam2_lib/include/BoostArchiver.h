@@ -1,5 +1,5 @@
 /*
-* map save/load extension for ORB_SLAM2
+ * map save/load extension for ORB_SLAM2
  * This header contains boost headers needed by serialization
  *
  * object to save:
@@ -8,7 +8,6 @@
  *   - Map
  *   - MapPoint
  */
-
 #ifndef BOOST_ARCHIVER_H
 #define BOOST_ARCHIVER_H
 #include <boost/serialization/list.hpp>
@@ -22,7 +21,9 @@
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/base_object.hpp>
 // base object needed by DBoW2::BowVector and DBoW2::FeatureVector
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
+
+
 
 #include "Thirdparty/DBoW2/DBoW2/BowVector.h"
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
@@ -35,13 +36,13 @@ namespace boost{
     template<class Archive>
     void serialize(Archive &ar, DBoW2::BowVector &BowVec, const unsigned int file_version)
     {
-        ar & boost::serialization::base_object<DBoW2::BowVector::super>(BowVec);
+        ar & boost::serialization::base_object< std::map<DBoW2::WordId, DBoW2::WordValue> >(BowVec);
     }
     /* serialization for DBoW2 FeatureVector */
     template<class Archive>
     void serialize(Archive &ar, DBoW2::FeatureVector &FeatVec, const unsigned int file_version)
     {
-        ar & boost::serialization::base_object<DBoW2::FeatureVector::super>(FeatVec);
+        ar & boost::serialization::base_object<std::map<DBoW2::NodeId, std::vector<unsigned int> > >(FeatVec);
     }
 
     /* serialization for CV KeyPoint */

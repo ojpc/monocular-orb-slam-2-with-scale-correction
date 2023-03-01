@@ -33,6 +33,8 @@
 #include <octomap_msgs/conversions.h>
 #include <octomap_ros/conversions.h>
 
+//#include <orb_slam2_ros/SaveMap.h>
+
 #include <chrono>
 #include <stdint.h>
 
@@ -56,11 +58,12 @@ ROSPublisher::ROSPublisher(Map *map, double frequency, ros::NodeHandle nh) :
     camera_height_mult_(1.0),
     camera_height_corrected_(camera_height_*camera_height_mult_),
     publish_octomap_(false), publish_projected_map_(true), publish_gradient_map_(false)
+    
 {
 
     initializeParameters(nh);
     orb_state_.state = orb_slam2_ros::ORBState::UNKNOWN;
-
+    name_of_node_ = ros::this_node::getName();
     // initialize publishers
     map_pub_         = nh_.advertise<sensor_msgs::PointCloud2>("map", 3);
     map_updates_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("map_updates", 3);
@@ -76,6 +79,12 @@ ROSPublisher::ROSPublisher(Map *map, double frequency, ros::NodeHandle nh) :
     // initialize subscribers
     mode_sub_       = nh_.subscribe("switch_mode",    1, &ROSPublisher::localizationModeCallback,   this);
     clear_path_sub_ = nh_.subscribe("clear_cam_path", 1, &ROSPublisher::clearCamTrajectoryCallback, this);
+
+   // bool SaveMapSrva (orb_slam2_ros::SaveMap::Request &req, orb_slam2_ros::SaveMap::Response &res);
+    //service_server_ = nh_.advertiseService(name_of_node_+"/save_map", SaveMapSrva, this);
+
+
+
 
     if (octomap_enabled_)
     {
@@ -148,7 +157,7 @@ void ROSPublisher::initializeParameters(ros::NodeHandle &nh) {
 
   nh.param<std::string>("/orb_slam2_ros/frame/map_frame",          map_frame_,          ROSPublisher::DEFAULT_MAP_FRAME);
   nh.param<std::string>("/orb_slam2_ros/frame/map_frame_adjusted", map_frame_adjusted_, "/orb_slam2/odom");
-  nh.param<std::string>("/orb_slam2_ros/frame/camera_frame",       camera_frame_,       ROSPublisher::DEFAULT_CAMERA_FRAME);
+  nh.param<std::string>("/orb_slam2_ros/frame/camera_frame",       camera_frame_,       "usb_cam");
   nh.param<std::string>("/orb_slam2_ros/frame/base_frame",         base_frame_,         "/orb_slam2/base_link");
 
   nh.param<bool>("/orb_slam2_ros/octomap/enabled",                octomap_enabled_,        true);
@@ -1189,3 +1198,16 @@ void ROSPublisher::localizationModeCallback(const std_msgs::Bool::ConstPtr& msg)
   }
 
 }
+/*
+bool ROSPublisher::SaveMapSrv (ORB_SLAM2::SaveMap::Request &req, ORB_SLAM2::SaveMap::Response &res) {
+  res.success = orb_slam_->SaveMap(req.name);
+
+  if (res.success) {
+    ROS_INFO_STREAM ("Map was saved as " << req.name);
+  } else {
+    ROS_ERROR ("Map could not be saved.");
+  }
+
+  return res.success;
+}
+*/

@@ -1,7 +1,7 @@
-# orb_slam2_ros: # uncomment this if you will load params outside node's namespace in .launch file
+#orb_slam2_ros: # uncomment this if you will load params outside node's namespace in .launch file
   topic:
     freq: 100                               # frequency of SLAM system job
-    image_topic: "/raspicam_node/image/raw" # "/webcam/image_raw"
+    image_topic: "/camera/rgb/image_raw" # "/webcam/image_raw"
     orb_state_republish_rate: 10            # re-publish state in Hz
   map_scale:
     perform_correction: true                    # possible to do with wheel encoders and robot description
@@ -14,7 +14,7 @@
     map_frame: "map"                         # global static map
     map_frame_adjusted: "map_odom_interface" # name of interface frame between /map and /odom
     base_frame: "base_link"                  # robot base frame
-    camera_frame: "camera_optical"           # optical (see REP103) frame of camera
+    camera_frame: "usb_cam"           # optical (see REP103) frame of camera   # camera_optical
   octomap:
     enabled: true                # if set false - octomap, projected map and gradient map will not be published
     publish_octomap: true        # octree's voxels visualization

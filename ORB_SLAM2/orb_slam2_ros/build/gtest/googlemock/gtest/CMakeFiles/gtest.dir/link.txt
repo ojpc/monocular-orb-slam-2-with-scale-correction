@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wall  -O3 -march=native  -shared -Wl,-soname,libgtest.so -o libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o  -L/home/oz/Desktop/neworbslam/src/ORB-SLAM2_ROS/ORB_SLAM2/orb_slam2_ros/build/gtest/googlemock/gtest/src -Wl,-rpath,/home/oz/Desktop/neworbslam/src/ORB-SLAM2_ROS/ORB_SLAM2/orb_slam2_ros/build/gtest/googlemock/gtest/src -lpthread 

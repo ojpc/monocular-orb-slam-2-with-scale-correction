@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wall  -O3 -march=native  -shared -Wl,-soname,libPublisherUtils.so -o devel/lib/libPublisherUtils.so CMakeFiles/PublisherUtils.dir/src/PublisherUtils.cpp.o 

@@ -99,6 +99,9 @@ System::System(std::unique_ptr<IBuilder> builder)
     if (!mpBuilder)
         throw std::invalid_argument("builder shouldn't be null");
 
+    const std::string & map_file = "/home/oz/Desktop/pointclouds/test_1.bin";
+    bool load_map = true;
+
     // Output welcome message
     cout << endl <<
     "ORB-SLAM2 Copyright (C) 2014-2016 Raul Mur-Artal, University of Zaragoza." << endl <<
@@ -139,6 +142,20 @@ System::System(std::unique_ptr<IBuilder> builder)
 
     mpLoopCloser->SetTracker(mpTracker);
     mpLoopCloser->SetLocalMapper(mpLocalMapper);
+/*
+    // begin map serialization addition
+    // load serialized map
+    if (load_map && LoadMap(map_file)) {
+        std::cout << "Using loaded map with " << mpMap->MapPointsInMap() << " points\n" << std::endl;
+    }
+    else {
+        //Create KeyFrame Database
+        mpKeyFrameDatabase = new KeyFrameDatabase(*mpVocabulary);
+        //Create the Map
+        mpMap = new Map();
+    }
+    // end map serialization addition
+*/
 }
 
 void System::Start()
@@ -526,6 +543,133 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
 }
+/*
+bool System::SetCallStackSize (const rlim_t kNewStackSize) {
+    struct rlimit rlimit;
+    int operation_result;
+
+    operation_result = getrlimit(RLIMIT_STACK, &rlimit);
+    if (operation_result != 0) {
+        std::cerr << "Error getting the call stack struct" << std::endl;
+        return false;
+    }
+
+    if (kNewStackSize > rlimit.rlim_max) {
+        std::cerr << "Requested call stack size too large" << std::endl;
+        return false;
+    }
+
+    if (rlimit.rlim_cur <= kNewStackSize) {
+        rlimit.rlim_cur = kNewStackSize;
+        operation_result = setrlimit(RLIMIT_STACK, &rlimit);
+        if (operation_result != 0) {
+            std::cerr << "Setrlimit returned result: " << operation_result << std::endl;
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
 
 
+rlim_t System::GetCurrentCallStackSize () {
+    struct rlimit rlimit;
+    int operation_result;
+
+    operation_result = getrlimit(RLIMIT_STACK, &rlimit);
+    if (operation_result != 0) {
+        std::cerr << "Error getting the call stack struct" << std::endl;
+        return 16 * 1024L * 1024L; //default
+    }
+
+    return rlimit.rlim_cur;
+}
+
+// map serialization addition
+bool System::SaveMap(const string &filename) {
+    unique_lock<mutex>MapPointGlobal(MapPoint::mGlobalMutex);
+    std::ofstream out(filename, std::ios_base::binary);
+    if (!out) {
+        std::cerr << "cannot write to map file: " << map_file << std::endl;
+        return false;
+    }
+
+    const rlim_t kNewStackSize = 64L * 1024L * 1024L;   // min stack size = 64 Mb
+    const rlim_t kDefaultCallStackSize = GetCurrentCallStackSize();
+    if (!SetCallStackSize(kNewStackSize)) {
+        std::cerr << "Error changing the call stack size; Aborting" << std::endl;
+        return false;
+    }
+    
+    try {
+        std::cout << "saving map file: ################################# " << map_file << std::flush;
+        boost::archive::binary_oarchive oa(out, boost::archive::no_header);
+        oa << mpMap;
+        oa << mpKeyFrameDatabase;
+        std::cout << " ... done" << std::endl;
+        cout << mpMap;
+        cout << mpKeyFrameDatabase;
+        out.close();
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        SetCallStackSize(kDefaultCallStackSize);
+        return false;
+    } catch (...) {
+        std::cerr << "Unknows exeption" << std::endl;
+        SetCallStackSize(kDefaultCallStackSize);
+        return false;
+    }
+
+    SetCallStackSize(kDefaultCallStackSize);
+
+    return true;
+}
+
+bool System::LoadMap(const string &filename) {
+
+    unique_lock<mutex>MapPointGlobal(MapPoint::mGlobalMutex);
+    std::ifstream in(filename, std::ios_base::binary);
+    if (!in) {
+        cerr << "Cannot open map file: " << map_file << " , you need create it first!" << std::endl;
+        return false;
+    }
+
+    const rlim_t kNewStackSize = 64L * 1024L * 1024L;   // min stack size = 64 Mb
+    const rlim_t kDefaultCallStackSize = GetCurrentCallStackSize();
+    if (!SetCallStackSize(kNewStackSize)) {
+        std::cerr << "Error changing the call stack size; Aborting" << std::endl;
+        return false;
+    }
+
+    std::cout << "Loading map file: " << map_file << std::flush;
+    boost::archive::binary_iarchive ia(in, boost::archive::no_header);
+    ia >> mpMap;
+    ia >> mpKeyFrameDatabase;
+    mpKeyFrameDatabase->SetORBvocabulary(mpVocabulary);
+    std::cout << " ... done" << std::endl;
+
+    std::cout << "Map reconstructing" << flush;
+    vector<ORB_SLAM2::KeyFrame*> vpKFS = mpMap->GetAllKeyFrames();
+    unsigned long mnFrameId = 0;
+    for (auto it:vpKFS) {
+
+        it->SetORBvocabulary(mpVocabulary);
+        it->ComputeBoW();
+
+        if (it->mnFrameId > mnFrameId) {
+            mnFrameId = it->mnFrameId;
+        }
+    }
+
+    Frame::nNextId = mnFrameId;
+
+    std::cout << " ... done" << std::endl;
+    in.close();
+
+    SetCallStackSize(kDefaultCallStackSize);
+
+    return true;
+}
+
+*/
 } //namespace ORB_SLAM
